@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { twiml } from "twilio";
 
-const openai = new OpenAI(process.env.OPENAI_API_KEY);
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function POST(req: Request) {
   const formData = await req.formData();
@@ -28,10 +27,11 @@ export async function POST(req: Request) {
     ],
   });
 
-  const reply = aiResponse.choices[0].message.content;
-
   // Generate Twilio voice response
   const twimlResponse = new twiml.VoiceResponse();
+  const reply =
+    aiResponse.choices[0].message.content ||
+    "I'm sorry, I didn't understand that. Can you please try again?";
   twimlResponse.say(reply);
   twimlResponse.record({ transcribe: true, action: "/api/process-ivr" });
 
